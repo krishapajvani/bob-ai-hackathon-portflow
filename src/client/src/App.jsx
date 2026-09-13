@@ -1,154 +1,114 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-// ── Page placeholders ─────────────────────────────────────────────────────────
-// These will be replaced with full implementations in Phase 5.
-// They are stubs so the router works and the app can be navigated from day one.
+import Overview   from './pages/Overview';
+import Vessels    from './pages/Vessels';
+import Berths     from './pages/Berths';
+import RoutesPage from './pages/Routes';
+import Plan       from './pages/Plan';
+import AiInsights from './pages/AiInsights';
 
-function Dashboard() {
+// ── Navigation items ──────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { to: '/',          icon: '📊', label: 'Overview',      end: true  },
+  { to: '/vessels',   icon: '🚢', label: 'Vessels',       end: false },
+  { to: '/berths',    icon: '⚓', label: 'Berth Planner', end: false },
+  { to: '/routes',    icon: '🗺️',  label: 'Route Advisor', end: false },
+  { to: '/plan',      icon: '📅', label: '72-h Plan',     end: false },
+  { to: '/ai',        icon: '🤖', label: 'AI Insights',   end: false },
+];
+
+// Page titles keyed by pathname prefix
+const PAGE_TITLES = {
+  '/':        'Overview',
+  '/vessels': 'Vessels',
+  '/berths':  'Berth Planner',
+  '/routes':  'Route Advisor',
+  '/plan':    '72-Hour Operational Plan',
+  '/ai':      'AI Insights',
+};
+
+// ── Topbar (reads current route for title) ───────────────────────────────────
+function Topbar() {
+  const location = useLocation();
+  const path  = location.pathname;
+  const title = Object.entries(PAGE_TITLES)
+    .filter(([k]) => path === '/' ? k === '/' : path.startsWith(k) && k !== '/')
+    .map(([, v]) => v)[0] || PAGE_TITLES['/'];
+
+  const now = new Date().toLocaleString('en-GB', {
+    weekday: 'short', day: '2-digit', month: 'short',
+    year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+
   return (
-    <div className="container py-4">
-      <h2>Dashboard</h2>
-      <p className="text-muted">Port overview — congestion score, live vessel status.</p>
-      <HealthCheck />
+    <div className="pf-topbar">
+      <h1 className="pf-topbar-title">{title}</h1>
+      <span className="pf-topbar-meta">{now}</span>
     </div>
   );
 }
 
-function Vessels() {
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function Sidebar() {
   return (
-    <div className="container py-4">
-      <h2>Vessels</h2>
-      <p className="text-muted">Inbound, waiting, and berthed vessel list.</p>
-    </div>
-  );
-}
-
-function BerthPlanner() {
-  return (
-    <div className="container py-4">
-      <h2>Berth Planner</h2>
-      <p className="text-muted">Berth availability grid and AI optimisation.</p>
-    </div>
-  );
-}
-
-function RoutesPage() {
-  return (
-    <div className="container py-4">
-      <h2>Alternative Routes</h2>
-      <p className="text-muted">Route recommendations for waiting vessels.</p>
-    </div>
-  );
-}
-
-function OperationalPlan() {
-  return (
-    <div className="container py-4">
-      <h2>72-Hour Operational Plan</h2>
-      <p className="text-muted">AI-generated port operations plan.</p>
-    </div>
-  );
-}
-
-// ── Health check widget (visible on Dashboard) ────────────────────────────────
-function HealthCheck() {
-  const [status, setStatus] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  React.useEffect(() => {
-    fetch(`${apiUrl}/api/health`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [apiUrl]);
-
-  if (loading) return <p className="text-muted">Checking backend status…</p>;
-  if (error)
-    return (
-      <div className="alert alert-danger">
-        <strong>Backend unreachable:</strong> {error}
-        <br />
-        <small>Make sure the server is running on {apiUrl}</small>
-      </div>
-    );
-
-  return (
-    <div className={`alert ${status.success ? 'alert-success' : 'alert-warning'}`}>
-      <strong>Backend status:</strong> {status.status} &nbsp;|&nbsp;
-      <strong>Database:</strong> {status.database} &nbsp;|&nbsp;
-      <small className="text-muted">{status.timestamp}</small>
-    </div>
-  );
-}
-
-// ── Navbar ────────────────────────────────────────────────────────────────────
-function Navbar() {
-  return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container">
-        <span className="navbar-brand fw-bold">⚓ PortFlow AI</span>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span className="navbar-toggler-icon" />
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            {[
-              { to: '/', label: 'Dashboard' },
-              { to: '/vessels', label: 'Vessels' },
-              { to: '/berths', label: 'Berth Planner' },
-              { to: '/routes', label: 'Routes' },
-              { to: '/plan', label: '72-h Plan' },
-            ].map(({ to, label }) => (
-              <li className="nav-item" key={to}>
-                <NavLink
-                  to={to}
-                  end={to === '/'}
-                  className={({ isActive }) =>
-                    `nav-link${isActive ? ' active fw-semibold' : ''}`
-                  }
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+    <aside className="pf-sidebar">
+      {/* Brand */}
+      <div className="pf-sidebar-brand">
+        <span className="pf-sidebar-brand-icon">⚓</span>
+        <div>
+          <span className="pf-sidebar-brand-name">PortFlow AI</span>
+          <span className="pf-sidebar-brand-sub">Port Operations</span>
         </div>
       </div>
-    </nav>
+
+      {/* Nav */}
+      <ul className="pf-nav" role="navigation">
+        {NAV_ITEMS.map(({ to, icon, label, end }) => (
+          <li className="pf-nav-item" key={to}>
+            <NavLink
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `pf-nav-link${isActive ? ' active' : ''}`
+              }
+            >
+              <span className="pf-nav-icon">{icon}</span>
+              {label}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+
+      {/* Footer */}
+      <div className="pf-sidebar-footer">
+        IBM Bobathon 2026
+      </div>
+    </aside>
   );
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
-function App() {
+// ── App shell ─────────────────────────────────────────────────────────────────
+export default function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/vessels" element={<Vessels />} />
-        <Route path="/berths" element={<BerthPlanner />} />
-        <Route path="/routes" element={<RoutesPage />} />
-        <Route path="/plan" element={<OperationalPlan />} />
-      </Routes>
+      <div className="pf-shell">
+        <Sidebar />
+        <div className="pf-main">
+          <Topbar />
+          <main className="pf-content">
+            <Routes>
+              <Route path="/"        element={<Overview />}   />
+              <Route path="/vessels" element={<Vessels />}    />
+              <Route path="/berths"  element={<Berths />}     />
+              <Route path="/routes"  element={<RoutesPage />} />
+              <Route path="/plan"    element={<Plan />}       />
+              <Route path="/ai"      element={<AiInsights />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
     </BrowserRouter>
   );
 }
-
-export default App;
