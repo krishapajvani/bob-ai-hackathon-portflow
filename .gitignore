@@ -1,0 +1,35 @@
+﻿# ── Node ───────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Environment / secrets ──────────────────────────────────────────────────────
+# NEVER commit real .env files — use .env.example instead
+.env
+.env.local
+.env.*.local
+
+# ── Build output ───────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+
+# ── OS / editor ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# ── Logs ───────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Test / coverage ────────────────────────────────────────────────────────────
+coverage/
