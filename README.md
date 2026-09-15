@@ -19,7 +19,6 @@
 | **Team Lead** | Krisha Pajvani |
 | **Members**   | Krisha Pajvani, Purvi Kotadiya, Niti, Riya |
 
-> Update the member list above if you are submitting as a team with additional members.
 
 ---
 
